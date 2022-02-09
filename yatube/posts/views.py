@@ -1,3 +1,4 @@
+from operator import is_not
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -111,9 +112,7 @@ def follow_index(request):
     following = Follow.objects.filter(user_id=request.user.id).select_related(
         "author"
     )
-    posts = []
-    for author_id in following:
-        posts.append(author_id.author)
+    posts = [author_id.author for author_id in following]
     posts_list = Post.objects.all().filter(author__in=posts)
     counter = posts_list.count()
     context = {
@@ -127,16 +126,13 @@ def follow_index(request):
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
     if request.user != author:
-        if (
-            Follow.objects.filter(author=author, user=request.user).exists()
-            is False
-        ):
-            Follow.objects.create(author=author, user=request.user)
+        Follow.objects.get_or_create(author=author, user=request.user)
     return redirect("posts:profile", username=username)
 
 
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    Follow.objects.filter(author=author, user=request.user).delete()
+    if Follow.objects.filter(author=author, user=request.user):
+        Follow.objects.filter(author=author, user=request.user).delete()
     return redirect("posts:profile", username=username)
