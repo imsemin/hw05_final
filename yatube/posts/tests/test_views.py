@@ -386,16 +386,16 @@ class FollowViewTest(TestCase):
     def test_following_system(self):
         """Проверка работоспособности системы подписки."""
         new_user = User.objects.create_user(username="Test_name")
-        response_not_authorized = Client(new_user).get(
+        Client(new_user).get(
             reverse(
                 "posts:profile_follow",
                 kwargs={"username": FollowViewTest.user},
             )
         )
-        response_auth = self.authorized_client.get(
+        self.authorized_client.get(
             reverse("posts:profile_follow", kwargs={"username": new_user})
         )
-        response_user_to_user = self.authorized_client.get(
+        self.authorized_client.get(
             reverse(
                 "posts:profile_follow",
                 kwargs={"username": FollowViewTest.user},
@@ -421,7 +421,7 @@ class FollowViewTest(TestCase):
         """Проверка работоспособности системы отписки."""
         new_user = User.objects.create_user(username="Test_name")
         Follow.objects.create(author=new_user, user=FollowViewTest.user)
-        response = self.authorized_client.get(
+        self.authorized_client.get(
             reverse(
                 "posts:profile_unfollow",
                 kwargs={"username": new_user},
@@ -446,7 +446,7 @@ class FollowViewTest(TestCase):
             author=new_user,
             group=new_group,
         )
-        response_follow = self.authorized_client.get(
+        self.authorized_client.get(
             reverse("posts:profile_follow", kwargs={"username": new_user})
         )
         response_page = self.authorized_client.get(
